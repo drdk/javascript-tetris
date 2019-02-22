@@ -12,6 +12,7 @@ class Tetris {
     this.context = canvasElement.getContext('2d');
     this.createBoardArray();
     this.drawSquares();
+    this.registerKeyBindings()
     this.play();
   }
 
@@ -147,13 +148,32 @@ class Tetris {
       }
     }
   }
+
+  registerKeyBindings() {
+    function controls(event) {
+      if (event.keyCode === 37) {
+        piece.moveLeft();
+      }
+      if (event.keyCode === 39) {
+        piece.moveRight();
+      } 
+      if (event.keyCode === 40) {
+        piece.moveDown();
+      }
+      if (event.keyCode === 38) {
+        piece.rotate();
+      }
+      timeToDrop = Date.now();
+    }
+    document.addEventListener('keydown', controls);
+  }
 }
 
 // @TODO
-// rotation
 // left key
 // right key
 // down key
+// rotation
 // game over div
 // remove full rows
 // score 
