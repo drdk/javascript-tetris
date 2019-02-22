@@ -159,4 +159,4 @@ const PIECE_COLOR_MAPPING = [
 	[Z, 'red']
 ]
 
-export { I, J, L, O, S, T, Z, PIECE_COLOR_MAPPING };
+export { PIECE_COLOR_MAPPING };
