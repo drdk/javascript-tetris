@@ -115,27 +115,32 @@ class Piece {
     this.tetromino = tetromino;
     this.tetrominoRotation = 0;
     this.activeTetromino = this.tetromino[this.tetrominoRotation];
-    this.colour = colour;
-    this.rowValue = -this.activeTetromino.length + 1;
+    this.colour = colour; // starts the piece above the board
+
+    this.rowValue = -this.activeTetromino.length - 1; // centers it horizontally when created
+
     this.colValue = 3;
   }
 
   moveDown() {
     this.rowValue++;
-  } // moveLeft() {
-  //   this.x--;
-  // }
-  // moveRight() {
-  //   this.x++;
-  // }
-  // rotate() {
-  //   if (this.tetrominoRotation === 4) {
-  //     this.tetrominoRotation = 0;
-  //   } else {
-  //     this.tetrominoRotation++;
-  //   }
-  // }
+  }
 
+  moveLeft() {
+    this.colValue--;
+  }
+
+  moveRight() {
+    this.colValue++;
+  }
+
+  rotate() {
+    if (this.tetrominoRotation === 4) {
+      this.tetrominoRotation = 0;
+    } else {
+      this.tetrominoRotation++;
+    }
+  }
 
 }
 
@@ -161,6 +166,7 @@ __webpack_require__.r(__webpack_exports__);
 let board = [];
 let timeToDrop = Date.now();
 let gameOver = false;
+let piece = null;
 
 class Tetris {
   constructor(canvasElement) {
@@ -168,13 +174,6 @@ class Tetris {
     this.createBoardArray();
     this.drawSquares();
     this.play();
-  }
-
-  drawSquare(x, y, colour) {
-    this.context.fillStyle = colour;
-    this.context.fillRect(x * _config__WEBPACK_IMPORTED_MODULE_0__["SQUARE"], y * _config__WEBPACK_IMPORTED_MODULE_0__["SQUARE"], _config__WEBPACK_IMPORTED_MODULE_0__["SQUARE"], _config__WEBPACK_IMPORTED_MODULE_0__["SQUARE"]);
-    this.context.strokeStyle = '#888';
-    this.context.strokeRect(x * _config__WEBPACK_IMPORTED_MODULE_0__["SQUARE"], y * _config__WEBPACK_IMPORTED_MODULE_0__["SQUARE"], _config__WEBPACK_IMPORTED_MODULE_0__["SQUARE"], _config__WEBPACK_IMPORTED_MODULE_0__["SQUARE"]);
   }
 
   createBoardArray() {
@@ -197,7 +196,14 @@ class Tetris {
     }
   }
 
-  drawPiece(piece, remove = false) {
+  drawSquare(x, y, colour) {
+    this.context.fillStyle = colour;
+    this.context.fillRect(x * _config__WEBPACK_IMPORTED_MODULE_0__["SQUARE"], y * _config__WEBPACK_IMPORTED_MODULE_0__["SQUARE"], _config__WEBPACK_IMPORTED_MODULE_0__["SQUARE"], _config__WEBPACK_IMPORTED_MODULE_0__["SQUARE"]);
+    this.context.strokeStyle = '#888';
+    this.context.strokeRect(x * _config__WEBPACK_IMPORTED_MODULE_0__["SQUARE"], y * _config__WEBPACK_IMPORTED_MODULE_0__["SQUARE"], _config__WEBPACK_IMPORTED_MODULE_0__["SQUARE"], _config__WEBPACK_IMPORTED_MODULE_0__["SQUARE"]);
+  }
+
+  drawPiece(remove = false) {
     const colour = remove ? _config__WEBPACK_IMPORTED_MODULE_0__["EMPTY"] : piece.colour;
 
     for (let row = 0; row < piece.activeTetromino.length; row++) {
@@ -209,25 +215,96 @@ class Tetris {
     }
   }
 
-  play() {
+  generateRandomPiece() {
     const randomNum = Math.floor(Math.random() * _tetrominoes__WEBPACK_IMPORTED_MODULE_1__["PIECE_COLOR_MAPPING"].length);
-    const piece = new _Piece__WEBPACK_IMPORTED_MODULE_2__["default"](_tetrominoes__WEBPACK_IMPORTED_MODULE_1__["PIECE_COLOR_MAPPING"][randomNum][0], _tetrominoes__WEBPACK_IMPORTED_MODULE_1__["PIECE_COLOR_MAPPING"][randomNum][1]);
+    return new _Piece__WEBPACK_IMPORTED_MODULE_2__["default"](_tetrominoes__WEBPACK_IMPORTED_MODULE_1__["PIECE_COLOR_MAPPING"][randomNum][0], _tetrominoes__WEBPACK_IMPORTED_MODULE_1__["PIECE_COLOR_MAPPING"][randomNum][1]);
+  }
+
+  play() {
+    piece = this.generateRandomPiece();
     this.drawPiece(piece);
     this.drop(piece);
   }
 
-  drop(piece) {
+  placePiece() {
+    for (let row = 0; row < piece.activeTetromino.length; row++) {
+      for (let col = 0; col < piece.activeTetromino.length; col++) {
+        // skips the squares that are blank in the active tetromino
+        if (!piece.activeTetromino[row][col]) {
+          continue;
+        } // if the row value is less than 0 then you are above the board
+        // and you have lost...loser. 
+
+
+        if (piece.rowValue + row < 0) {
+          gameOver = true;
+          break;
+        } // colour in the board
+
+
+        board[piece.rowValue + row][piece.colValue + col] = piece.colour;
+      }
+    }
+  }
+
+  drop() {
     const now = Date.now();
     const delta = now - timeToDrop;
+    const timeToNextDrop = 100;
 
-    if (delta > 1000) {
-      this.drawPiece(piece, 'remove');
-      piece.moveDown();
-      this.drawPiece(piece);
+    if (delta > timeToNextDrop) {
+      if (!this.willCollideWithPieceOrBoard(0, 1)) {
+        this.drawPiece('remove');
+        piece.moveDown();
+        this.drawPiece();
+      } else {
+        // colour in the actual board so the area no longer 
+        // registers as empty and make a new piece
+        this.placePiece();
+        piece = this.generateRandomPiece();
+      }
+
       timeToDrop = Date.now();
     }
 
-    requestAnimationFrame(this.drop.bind(this, piece));
+    if (gameOver) {
+      alert('You are such a loser, how do you live like that?');
+      console.log(board); //@TODO add a fancy modal here asking to play again
+    } else {
+      requestAnimationFrame(() => this.drop());
+    }
+  }
+
+  willCollideWithPieceOrBoard(xAdjustment, yAdjustment) {
+    // loop through each square in the piece's array
+    for (let row = 0; row < piece.activeTetromino.length; row++) {
+      for (let col = 0; col < piece.activeTetromino.length; col++) {
+        // skip empty (0 value) square (see tetrominis.js)
+        if (!piece.activeTetromino[row][col]) {
+          continue;
+        } // adjusts the coordinate of the pieces square based on movement 
+        // that is about to happen
+
+
+        let newColValue = piece.colValue + col + xAdjustment;
+        let newRowValue = piece.rowValue + row + yAdjustment; // skip values in which y is not 0 yet (as the piece starts above the
+        // grid, so y is initially negative)
+
+        if (newRowValue < 0) {
+          continue;
+        } // check if it will collide with board edges if this movement occurs
+
+
+        if (newColValue < 0 || newColValue >= _config__WEBPACK_IMPORTED_MODULE_0__["COLUMNS"] || newRowValue >= _config__WEBPACK_IMPORTED_MODULE_0__["ROWS"]) {
+          return true;
+        } // check if there is a placed piece on that square of the board
+
+
+        if (board[newRowValue][newColValue] !== undefined) {
+          return true;
+        }
+      }
+    }
   }
 
 }
@@ -281,7 +358,7 @@ const O = [[[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]]];
 const S = [[[0, 1, 1], [1, 1, 0], [0, 0, 0]], [[0, 1, 0], [0, 1, 1], [0, 0, 1]], [[0, 0, 0], [0, 1, 1], [1, 1, 0]], [[1, 0, 0], [1, 1, 0], [0, 1, 0]]];
 const T = [[[0, 1, 0], [1, 1, 1], [0, 0, 0]], [[0, 1, 0], [0, 1, 1], [0, 1, 0]], [[0, 0, 0], [1, 1, 1], [0, 1, 0]], [[0, 1, 0], [1, 1, 0], [0, 1, 0]]];
 const Z = [[[1, 1, 0], [0, 1, 1], [0, 0, 0]], [[0, 0, 1], [0, 1, 1], [0, 1, 0]], [[0, 0, 0], [1, 1, 0], [0, 1, 1]], [[0, 1, 0], [1, 1, 0], [1, 0, 0]]];
-const PIECE_COLOR_MAPPING = [[I, 'blue'], [J, 'orange'], [L, 'purple'], [O, 'blue'], [S, 'green'], [T, 'yellow'], [Z, 'red']];
+const PIECE_COLOR_MAPPING = [[I, 'cyan'], [J, 'orange'], [L, 'purple'], [O, 'blue'], [S, 'green'], [T, 'yellow'], [Z, 'red']];
 
 
 /***/ })

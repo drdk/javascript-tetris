@@ -15,12 +15,6 @@ function getPlugins() {
   ];
 }
 
-function getProductionPlugins() {
-  return [
-    new webpack.NoEmitOnErrorsPlugin()
-  ];
-}
-
 module.exports = {
   mode,
   entry: path.resolve(__dirname, './'),

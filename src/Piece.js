@@ -5,9 +5,9 @@ class Piece {
     this.activeTetromino = this.tetromino[this.tetrominoRotation];
     this.colour = colour;
 
-
-
-    this.rowValue = -this.activeTetromino.length + 1;
+    // starts the piece above the board
+    this.rowValue = -this.activeTetromino.length - 1;
+    // centers it horizontally when created
     this.colValue = 3;
   }
 

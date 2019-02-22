@@ -6,6 +6,7 @@
   "scripts": {
     "build": "webpack",
     "build:dev": "NODE_ENV=dev webpack --display-error-details",
+    "lint": "./node_modules/.bin/eslint ./",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "D Goomany",
@@ -14,6 +15,7 @@
     "@babel/core": "^7.2.2",
     "babel-cli": "^6.26.0",
     "babel-loader": "^8.0.5",
+    "eslint": "^5.14.1",
     "webpack": "^4.28.3",
     "webpack-cli": "^3.2.0"
   }
