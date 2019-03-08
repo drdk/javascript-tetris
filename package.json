@@ -3,11 +3,17 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "watch": {
+    "build:dev": "src/*.js"
+  },
   "scripts": {
-    "build": "webpack",
-    "build:dev": "NODE_ENV=dev webpack --display-error-details",
+    "copyIndex": "mkdir build && cp src/views/index.html build/index.html",
+    "build": "npm run clean && npm run copyIndex && webpack",
+    "clean": "rm -rf build",
+    "build:dev": "npm run clean && npm run copyIndex && NODE_ENV=dev webpack --display-error-details",
     "lint": "./node_modules/.bin/eslint ./",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "watch": "npm-watch"
   },
   "author": "D Goomany",
   "license": "ISC",
@@ -16,6 +22,7 @@
     "babel-cli": "^6.26.0",
     "babel-loader": "^8.0.5",
     "eslint": "^5.14.1",
+    "npm-watch": "^0.6.0",
     "webpack": "^4.28.3",
     "webpack-cli": "^3.2.0"
   }
