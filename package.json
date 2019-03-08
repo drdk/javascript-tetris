@@ -4,7 +4,10 @@
   "description": "",
   "main": "index.js",
   "watch": {
-    "build:dev": "src/*.js"
+    "build:dev": {
+      "patterns": ["src"],
+      "extensions": "js, html"
+    }
   },
   "scripts": {
     "copyIndex": "mkdir build && cp src/views/index.html build/index.html",
