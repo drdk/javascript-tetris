@@ -24,11 +24,13 @@ class Piece {
   }
 
   rotate() {
-    if (this.tetrominoRotation === 4) {
+    if (this.tetrominoRotation === 3) {
       this.tetrominoRotation = 0;
     } else {
       this.tetrominoRotation++;
     }
+    console.log('this.tetrominoRotation', this.tetrominoRotation);
+    this.activeTetromino = this.tetromino[this.tetrominoRotation];
   }
 }
 

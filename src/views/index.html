@@ -16,7 +16,7 @@
       width: 450px;
       margin: 0 auto;
     }
-    .score {
+    .controls-and-score {
       border: 1px solid red;
       height: 200px;
       width: 200px;
@@ -30,10 +30,20 @@
     }
     .score__number {
       display: inline-block;
-      margin-top: 30px;
+      margin-top: 5px;
+      font-weight: bold;
     }
     .hidden {
       visibility: hidden;
+    }
+    h2 {
+      font-size: 35px;
+    }
+    .pause {
+      margin-top: 30px;
+      padding: 4px;
+      width: 100px;
+      font-size: 16px
     }
   </style>
 </head>
@@ -45,9 +55,11 @@
     height="200">
     <div class="wrapper">
       <canvas id="tetris" width="200" height="400"></canvas>
-      <div class="score">
-        <h2 class="score__text">Score</h2>
-        <span class="score__number"></span>
+      <div class="controls-and-score">
+        <div class="score">
+          <h2 class="score__text">Score</h2>
+          <span class="score__number"></span>
+        </div>
       </div>
     </div>
   <script src="index.js"></script>

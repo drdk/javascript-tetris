@@ -8,6 +8,7 @@ let gameOver = false;
 let piece = null;
 const TIME_TO_NEXT_DROP = 300;
 let score = 0;
+let pause = false;
 
 class Tetris {
   constructor(canvasElement) {
@@ -15,6 +16,7 @@ class Tetris {
     this.createBoardArray();
     this.drawSquares();
     this.drawScore();
+    this.drawPause();
     this.registerKeyBindings()
     this.play();
   }
@@ -60,16 +62,21 @@ class Tetris {
     }
   }
 
-  generateRandomPiece() {
-    // const randomNum = Math.floor(Math.random() * PIECE_COLOR_MAPPING.length);
-    // return new Piece(
-    //   PIECE_COLOR_MAPPING[randomNum][0],
-    //   PIECE_COLOR_MAPPING[randomNum][1]
-    // );
+  drawPause() {
+    const button = document.createElement("button");
+    button.innerText = "Pause";
+    button.classList.add('pause');
+    button.addEventListener('click', () => {
+      this.pause();
+    }, false);
+    document.querySelector(".controls-and-score").appendChild(button);
+  }
 
+  generateRandomPiece() {
+    const randomNum = Math.floor(Math.random() * PIECE_COLOR_MAPPING.length);
     return new Piece(
-      PIECE_COLOR_MAPPING[3][0],
-      PIECE_COLOR_MAPPING[3][1]
+      PIECE_COLOR_MAPPING[randomNum][0],
+      PIECE_COLOR_MAPPING[randomNum][1]
     );
   }
 
@@ -77,6 +84,13 @@ class Tetris {
     piece = this.generateRandomPiece();
     this.drawPiece(piece);
     this.drop(piece);
+  }
+
+  pause() {
+    pause = !pause;
+    if (!pause) {
+      requestAnimationFrame(() => this.drop());
+    }
   }
 
   placePiece() {
@@ -122,7 +136,7 @@ class Tetris {
 
     if (gameOver) {
       alert('You are such a loser, how do you live like that?');
-    } else {
+    } else if (!pause) {
       requestAnimationFrame(() => this.drop());
     }
   }
@@ -240,8 +254,8 @@ class Tetris {
 }
 
 // @TODO
-// rotation
 // game over div
-// increase speed based on level 
+// increase speed based on level
+// preview of next piece that's coming
 
 export default Tetris;
