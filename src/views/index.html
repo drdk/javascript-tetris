@@ -3,19 +3,53 @@
 <head>
   <title>Tetris Game</title>
   <style>
-    #tetris,
     img {
       margin: 0 auto;
       display: block;
+    }
+    #tetris {
+      margin: 0 auto;
+      display: inline-block;
+      float: left;
+    }
+    .wrapper {
+      width: 450px;
+      margin: 0 auto;
+    }
+    .score {
+      border: 1px solid red;
+      height: 200px;
+      width: 200px;
+      float: right;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 30px;
+      text-align: center;
+    }
+    .score__text {
+      margin: 5px 0
+    }
+    .score__number {
+      display: inline-block;
+      margin-top: 30px;
+    }
+    .hidden {
+      visibility: hidden;
     }
   </style>
 </head>
 
 <body>
+  <h1 class="hidden">Tetris</h1>
   <img
     src="https://www.logolynx.com/images/logolynx/54/54baeecb11082b72c81bfd77bb8e6eff.png"
     height="200">
-  <canvas id="tetris" width="200" height="400"></canvas>
+    <div class="wrapper">
+      <canvas id="tetris" width="200" height="400"></canvas>
+      <div class="score">
+        <h2 class="score__text">Score</h2>
+        <span class="score__number"></span>
+      </div>
+    </div>
   <script src="index.js"></script>
 </body>
 
