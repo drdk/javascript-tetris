@@ -6,12 +6,15 @@ let board = [];
 let timeToDrop = Date.now();
 let gameOver = false;
 let piece = null;
+const TIME_TO_NEXT_DROP = 300;
+let score = 0;
 
 class Tetris {
   constructor(canvasElement) {
     this.context = canvasElement.getContext('2d');
     this.createBoardArray();
     this.drawSquares();
+    this.drawScore();
     this.registerKeyBindings()
     this.play();
   }
@@ -30,9 +33,13 @@ class Tetris {
       for (let col = 0; col < COLUMNS; col++) {
         // board[row][col] in drawSquare takes the 'white' from the
         // internal array and renders it in the canvas
-        board[row][col] = this.drawSquare(col, row, board[row][col]);
+        this.drawSquare(col, row, board[row][col]);
       }
     }
+  }
+
+  drawScore() {
+    document.querySelector(".score .score__number").textContent = score;
   }
 
   drawSquare(x, y, colour) {
@@ -44,7 +51,6 @@ class Tetris {
 
   drawPiece(remove = false) {
     const colour = remove ? EMPTY : piece.colour;
-    
     for (let row = 0; row < piece.activeTetromino.length; row++) {
       for (let col = 0; col < piece.activeTetromino.length; col++) {
         if (piece.activeTetromino[row][col]) {
@@ -55,10 +61,15 @@ class Tetris {
   }
 
   generateRandomPiece() {
-    const randomNum = Math.floor(Math.random() * PIECE_COLOR_MAPPING.length);
+    // const randomNum = Math.floor(Math.random() * PIECE_COLOR_MAPPING.length);
+    // return new Piece(
+    //   PIECE_COLOR_MAPPING[randomNum][0],
+    //   PIECE_COLOR_MAPPING[randomNum][1]
+    // );
+
     return new Piece(
-      PIECE_COLOR_MAPPING[randomNum][0],
-      PIECE_COLOR_MAPPING[randomNum][1]
+      PIECE_COLOR_MAPPING[3][0],
+      PIECE_COLOR_MAPPING[3][1]
     );
   }
 
@@ -92,26 +103,64 @@ class Tetris {
   drop() {
     const now = Date.now();
     const delta = now - timeToDrop;
-    const timeToNextDrop = 100;
 
-    if (delta > timeToNextDrop) {
+    if (delta > TIME_TO_NEXT_DROP) {
       if (!this.willCollideWithPieceOrBoard(0, 1)) {
         this.drawPiece('remove');
-        piece.moveDown()
+        piece.moveDown();
         this.drawPiece();
       } else {
+        // moving down is the only actions that places the piece on the board
         // colour in the actual board so the area no longer 
         // registers as empty and make a new piece
         this.placePiece();
+        this.removeFullRows();
         piece = this.generateRandomPiece();
       }
       timeToDrop = Date.now();
     }
+
     if (gameOver) {
       alert('You are such a loser, how do you live like that?');
     } else {
       requestAnimationFrame(() => this.drop());
     }
+  }
+
+  removeFullRows() {
+    // check if row full by looping through rows and for each one checking
+    // if each column square is filled in or not
+    for (let row = 0; row < ROWS; row++) {
+      let isRowFull = true;
+      
+      for(let column = 0; column < COLUMNS; column++) {               
+        isRowFull = isRowFull && board[row][column] !== EMPTY
+      }
+
+      // if row is full after going through all it's squares
+      // move all the squares down by one from row
+      if (isRowFull) {
+        for (let rowsToMove = row; rowsToMove > 1; rowsToMove--) {
+          for (let column = 0; column < COLUMNS; column++) {
+            board[rowsToMove][column] = board[rowsToMove - 1][column];
+          }
+        }
+        // now set the top row all to EMPTY
+        for (let column = 0; column < COLUMNS; column++) { 
+          board[0][column] = EMPTY;
+        }
+        // update the visual board based on the internal array
+        this.drawSquares();
+        // do score based things
+        this.adjustScore();
+        // update score
+        this.drawScore();
+      }
+    }
+  }
+
+  adjustScore() {
+    score += 10;
   }
 
   willCollideWithPieceOrBoard(xAdjustment, yAdjustment) {
@@ -141,7 +190,7 @@ class Tetris {
         }
 
         // check if there is a placed piece on that square of the board
-        if (board[newRowValue][newColValue] !== undefined) {
+        if (board[newRowValue][newColValue] !== EMPTY) {
           return true;
         }
 
@@ -150,32 +199,49 @@ class Tetris {
   }
 
   registerKeyBindings() {
-    function controls(event) {
+    document.addEventListener('keydown', () => {
       if (event.keyCode === 37) {
-        piece.moveLeft();
+        // move left if it wont collide
+        if (!this.willCollideWithPieceOrBoard(-1, 0)) {
+          this.drawPiece('remove');
+          piece.moveLeft();
+          this.drawPiece();
+        }
       }
       if (event.keyCode === 39) {
-        piece.moveRight();
+        // move right if it wont collide
+        if (!this.willCollideWithPieceOrBoard(1, 0)) {
+          this.drawPiece('remove');
+          piece.moveRight();
+          this.drawPiece();
+        }
       } 
       if (event.keyCode === 40) {
-        piece.moveDown();
+        // move down if it wont collide
+        if (!this.willCollideWithPieceOrBoard(0, 1)) {
+          this.drawPiece('remove');
+          piece.moveDown();
+          this.drawPiece();
+        } else {
+          // moving down is the only actions that places the piece on the board
+          // colour in the actual board so the area no longer 
+          // registers as empty and make a new piece
+          this.placePiece();
+          piece = this.generateRandomPiece();
+        }
       }
       if (event.keyCode === 38) {
+        this.drawPiece('remove');
         piece.rotate();
+        this.drawPiece();
       }
-      timeToDrop = Date.now();
-    }
-    document.addEventListener('keydown', controls);
+    });    
   }
 }
 
 // @TODO
-// left key
-// right key
-// down key
 // rotation
 // game over div
-// remove full rows
-// score 
+// increase speed based on level 
 
 export default Tetris;
