@@ -67,7 +67,7 @@ jobs:
       PRD_APPVAR: secret-value
       BASEPATH: /
       PROBEPATH: /
-      PORT: 3100
+      PORT: 80
       PAPERTRAIL: "false"
     steps:
       # Checkout project code, we need this to check if repo contains a helm chart.
