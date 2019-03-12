@@ -4,15 +4,8 @@
 #
 version: 2
 
-executors:
-  my-executor:
-    docker:
-      - image: buildpack-deps:jessie
-    working_directory: /tmp
-
 jobs:
   build:
-    executor: my-executor
     docker:
       - image: circleci/node:7.10
     steps:
@@ -31,7 +24,6 @@ jobs:
 
   # Build and publish a docker image
   Build And Publish:
-    executor: my-executor
     docker:
       - image: drdkorg/deployer:1.2.6-docker
         auth:
