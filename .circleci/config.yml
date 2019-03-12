@@ -16,6 +16,8 @@ jobs:
       - run:
           name: build
           command: npm run build
+      - persist_to_workspace:
+          root: build
 
   # Build and publish a docker image
   Build And Publish:
@@ -25,6 +27,8 @@ jobs:
           username: $DOCKER_LOGIN
           password: $DOCKER_PASSWORD
     steps:
+      - attach_workspace:
+          at: /tmp/build
       # Setup a remote docker instance, CircleCi does not allow docker in docker, this is their way of doing that.
       - setup_remote_docker
       # Use the deploy contains build in script to build and publish a docker image
