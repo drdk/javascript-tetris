@@ -18,9 +18,12 @@ jobs:
 
     steps:
       - checkout
+      # - run:
+      #     name: update-npm
+      #     command: 'sudo npm install -g npm@latest'
       - run:
-          name: update-npm
-          command: 'sudo npm install -g npm@latest'
+          name: install-dependencies
+          command: 'npm install'
       - run:
           name: build
           command: npm run build
