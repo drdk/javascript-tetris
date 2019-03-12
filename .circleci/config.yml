@@ -33,9 +33,9 @@ jobs:
       - attach_workspace:
           at: /tmp/build
       - run:
-        name: Copy artifacts
-        command: |
-          cp /tmp/build .
+          name: Copy artifacts
+          command: |
+            cp /tmp/build .
       # Setup a remote docker instance, CircleCi does not allow docker in docker, this is their way of doing that.
       - setup_remote_docker
       # Use the deploy contains build in script to build and publish a docker image
