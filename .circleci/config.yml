@@ -4,26 +4,90 @@
 #
 version: 2
 jobs:
-  build:
+
+  # Build and publish a docker image
+  Build And Publish:
     docker:
-      # specify the version you desire here
-      - image: circleci/node:7.10
-
-      # Specify service dependencies here if necessary
-      # CircleCI maintains a library of pre-built images
-      # documented at https://circleci.com/docs/2.0/circleci-images/
-      # - image: circleci/mongo:3.4.4
-
-    working_directory: ~/repo
-
+      - image: drdkorg/deployer:1.2.6-docker
+        auth:
+          username: $DOCKER_LOGIN
+          password: $DOCKER_PASSWORD
     steps:
+      # Checkout repository code for building the docker container
       - checkout
+      # Setup a remote docker instance, CircleCi does not allow docker in docker, this is their way of doing that.
+      - setup_remote_docker
+      # Use the deploy contains build in script to build and publish a docker image
       - run:
-          name: install-dependencies
-          command: 'npm install'
+          name: Build
+          command: |
+            build --publish
+      # Notify slack if build failed.
       - run:
-          name: build
-          command: npm run build
-      - store_artifacts:
-          path: build
-          prefix: build
+          name: Failure
+          command: |
+            slack --fail
+          when: on_fail
+
+  # Generate kubernetes manifests for the deployment to a given environemt.
+  Generate Test Manifests:
+    docker:
+      - image: drdkorg/deployer:1.2.9
+        auth:
+          username: $DOCKER_LOGIN
+          password: $DOCKER_PASSWORD
+    environment:
+      ## CD values
+      HELM_CHART: base-chart
+      ARGO_AUTOSYNC: "false"
+      ## Container / Application values
+      PRD_APPVAR: secret-value
+      BASEPATH: /
+      PROBEPATH: /
+      PORT: 3100
+      PAPERTRAIL: "false"
+    steps:
+      # Checkout project code, we need this to check if repo contains a helm chart.
+      - checkout
+      # Clone argo-state repository
+      - run:
+          name: Clone argo-state repository
+          Command: stateClone
+
+      # Check environment variables and set defaults if needed
+      - run:
+          name: Check environment variables
+          command: initialize 
+
+      # Generate the deployment and application manifests.
+      - run:
+          name: Generate Manifests
+          command: |
+            # Generate manifests - manifestgen paramter explantions eg. manifestgen -e prod -p PRD_
+            # -e --environment - kubernetes environment (review, test, preprod, prod)
+            # -p --prefix - environment variables to inject into the app container should have this prefx must be in the format of XXX_ when deployed. 
+            manifestgen -e test -p TST_
+
+      # Push manifests to argo-state repository
+      - run:
+          name: Push manifests to argo-state
+          command: statePush
+          
+      # Send notification incase of failure
+      - run:
+          name: Failure
+          command: |
+            slack --fail
+          when: on_fail
+
+workflows:
+  version: 2
+  AppDeploy:
+    jobs:
+      - Build And Publish
+      - Generate Test Manifests:
+          requires:
+            - Build And Publish
+          filters:
+            branches:
+              only: master
