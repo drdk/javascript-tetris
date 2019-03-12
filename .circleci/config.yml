@@ -5,6 +5,16 @@
 version: 2
 jobs:
 
+  build:
+    docker:
+      - image: circleci/node:7.10
+    - run:
+        name: install-dependencies
+        command: 'npm install'
+    - run:
+        name: build
+        command: npm run build
+
   # Build and publish a docker image
   Build And Publish:
     docker:
@@ -23,11 +33,11 @@ jobs:
           command: |
             build --publish
       # Notify slack if build failed.
-      - run:
-          name: Failure
-          command: |
-            slack --fail
-          when: on_fail
+      # - run:
+      #     name: Failure
+      #     command: |
+      #       slack --fail
+      #     when: on_fail
 
   # Generate kubernetes manifests for the deployment to a given environemt.
   Generate Test Manifests:
@@ -74,17 +84,20 @@ jobs:
           command: statePush
           
       # Send notification incase of failure
-      - run:
-          name: Failure
-          command: |
-            slack --fail
-          when: on_fail
+      # - run:
+      #     name: Failure
+      #     command: |
+      #       slack --fail
+      #     when: on_fail
 
 workflows:
   version: 2
   AppDeploy:
     jobs:
-      - Build And Publish
+      - build
+      - Build And Publish:
+          requires:
+            - build
       - Generate Test Manifests:
           requires:
             - Build And Publish
