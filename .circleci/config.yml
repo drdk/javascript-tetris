@@ -8,12 +8,14 @@ jobs:
   build:
     docker:
       - image: circleci/node:7.10
-    - run:
-        name: install-dependencies
-        command: 'npm install'
-    - run:
-        name: build
-        command: npm run build
+    steps:
+      - checkout
+      - run:
+          name: install-dependencies
+          command: 'npm install'
+      - run:
+          name: build
+          command: npm run build
 
   # Build and publish a docker image
   Build And Publish:
@@ -23,8 +25,6 @@ jobs:
           username: $DOCKER_LOGIN
           password: $DOCKER_PASSWORD
     steps:
-      # Checkout repository code for building the docker container
-      - checkout
       # Setup a remote docker instance, CircleCi does not allow docker in docker, this is their way of doing that.
       - setup_remote_docker
       # Use the deploy contains build in script to build and publish a docker image
