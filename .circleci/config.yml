@@ -3,9 +3,16 @@
 # Check https://circleci.com/docs/2.0/language-javascript/ for more details
 #
 version: 2
-jobs:
 
+executors:
+  my-executor:
+    docker:
+      - image: buildpack-deps:jessie
+    working_directory: /tmp
+
+jobs:
   build:
+    executor: my-executor
     docker:
       - image: circleci/node:7.10
     steps:
@@ -24,6 +31,7 @@ jobs:
 
   # Build and publish a docker image
   Build And Publish:
+    executor: my-executor
     docker:
       - image: drdkorg/deployer:1.2.6-docker
         auth:
@@ -32,6 +40,10 @@ jobs:
     steps:
       - attach_workspace:
           at: /tmp/build
+      - run:
+        name: Copy artifacts
+        command: |
+          cp /tmp/build .
       # Setup a remote docker instance, CircleCi does not allow docker in docker, this is their way of doing that.
       - setup_remote_docker
       # Use the deploy contains build in script to build and publish a docker image
