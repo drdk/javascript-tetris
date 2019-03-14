@@ -17,7 +17,7 @@
     "clean": "rm -rf build",
     "build:dev": "npm run clean && npm run copyIndex && NODE_ENV=dev webpack --display-error-details",
     "lint": "./node_modules/.bin/eslint ./",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "mocha",
     "watch": "npm-watch"
   },
   "author": "D Goomany",
@@ -29,6 +29,7 @@
     "eslint": "^5.14.1",
     "npm-watch": "^0.6.0",
     "webpack": "^4.28.3",
-    "webpack-cli": "^3.2.0"
+    "webpack-cli": "^3.2.0",
+    "mocha": "^6.0.2"
   }
 }
